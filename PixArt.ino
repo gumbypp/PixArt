@@ -218,26 +218,34 @@ int getPosFromXY(int x, int y)
   return y*10 + (9 - x);
 }
 
-void turnOnLEDsForPixelRow(int y, int pixelRow, int r, int g, int b)
+void turnOnLEDsForPixelRow(int y, int pixelRow, int xOffset, int r, int g, int b)
 {
   int x;
   for (x=0; x<8; x++) {
     if (pixelRow & (1<<x)) {
-      int pos = getPosFromXY(x + 1, y + 1);  // +1 on x,y to center it on the 10x10 grid
-      leds.setPixelColor(pos, r, g, b);
-    }    
+      int xPos = x + xOffset;
+      if (xPos >= 0 && xPos <= 9) {
+        int pos = getPosFromXY(xPos, y + 1);  // +1 on y to center vertically
+        leds.setPixelColor(pos, r, g, b);
+      }
+    }
+  }
+}
+
+// Draw a letter at a given x offset without clearing or showing
+// Used for drawing multiple letters in the same frame
+void drawLetterAtOffset(char letter[], int xOffset, int r, int g, int b)
+{
+  for (int row=0; row<8; row++) {
+    int pixelRow = letter[row];
+    turnOnLEDsForPixelRow(7-row, pixelRow, xOffset, r, g, b);
   }
 }
 
 void showLetterWithRGB(char letter[], int r, int g, int b)
 {
   clearLEDs();
-
-  for (int row=0; row<8; row++) {
-    int pixelRow = letter[row];
-    turnOnLEDsForPixelRow(7-row, pixelRow, r, g, b);
-  }
-  
+  drawLetterAtOffset(letter, 1, r, g, b);  // +1 to center on 10x10 grid
   leds.show();
 }
 
@@ -544,11 +552,31 @@ void loop()
 //  }
 //  delay(2000);
 
-  char *msg = "HNY  2 0 2 6!!";
+  char *msg = "HAPPY NEW YEAR 2026!!";
   int len = strlen(msg);
-  for (int i=0; i<len; i++) {
-    showLetterWithRGB(font8x8_basic[msg[i] - kFontBasicOffset], rand()%256, rand()%256, rand()%256);
-    delay(300);
+  int letterSpacing = 9;  // pixels between letter starts (8 for letter + 1 gap)
+
+  // Total scroll distance: start with first letter off-screen right,
+  // end with last letter off-screen left
+  int totalScroll = 10 + (len * letterSpacing) + 8;
+
+  for (int scroll=0; scroll<totalScroll; scroll++) {
+    clearLEDs();
+
+    // Draw each letter at its current position
+    for (int i=0; i<len; i++) {
+      int xOffset = 10 - scroll + (i * letterSpacing);
+
+      // Only draw if letter is potentially visible (-7 to 10)
+      if (xOffset >= -7 && xOffset <= 10) {
+        srand(i + 1);  // Seed based on letter index for stable colors
+        drawLetterAtOffset(font8x8_basic[msg[i] - kFontBasicOffset],
+                          xOffset, rand()%256, rand()%256, rand()%256);
+      }
+    }
+
+    leds.show();
+    delay(60);
   }
 
   // happy face
