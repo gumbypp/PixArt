@@ -453,7 +453,20 @@ const char string_6[] PROGMEM = "128 108 76 209 194 172 209 194 172 0 0 0 88 75 
 const char string_7[] PROGMEM = "153 136 102 179 166 136 162 153 136 161 142 125 153 136 121 216 201 177 204 187 152 157 121 80 92 51 10 0 0 0";
 const char string_8[] PROGMEM = "97 87 70 137 110 70 0 0 0 0 0 0 0 0 0 191 171 132 188 166 128 161 131 88 88 55 11 0 0 0";
 const char string_9[] PROGMEM = "222 222 222 91 71 46 144 116 80 132 105 72 142 113 71 144 108 61 153 125 81 139 108 67 81 51 16 222 222 222";
+
+const char string_0a[] PROGMEM = "0 0 0 0 0 0 213 187 152 239 208 164 244 211 164 235 201 154 231 197 153 219 190 150 0 0 0 0 0 0 ";
+const char string_1a[] PROGMEM = "0 0 0 207 181 143 218 185 140 222 187 142 219 182 135 211 174 129 210 172 129 199 161 120 199 166 131 0 0 0 ";
+const char string_2a[] PROGMEM = "196 174 141 197 163 122 201 167 123 190 155 113 178 140 99 178 139 99 188 147 107 182 140 100 182 144 106 181 149 117 ";
+const char string_3a[] PROGMEM = "204 178 141 154 118 85 118 93 66 52 39 27 120 87 60 141 105 73 50 37 25 114 79 53 173 130 92 170 139 107 ";
+const char string_4a[] PROGMEM = "199 171 130 158 125 90 135 107 75 99 75 53 133 103 74 125 93 65 86 59 41 120 80 55 158 116 84 165 133 103 ";
+const char string_5a[] PROGMEM = "180 151 111 155 127 91 183 148 104 176 139 95 119 94 65 131 98 65 162 119 83 148 105 73 138 105 78 151 123 97 ";
+const char string_6a[] PROGMEM = "181 150 108 0 0 0 196 162 117 154 123 84 47 37 23 95 70 46 169 127 89 149 112 80 0 0 0 124 106 88 ";
+const char string_7a[] PROGMEM = "0 0 0 0 0 0 179 146 104 133 100 67 30 21 13 30 21 13 97 68 48 124 88 65 0 0 0 0 0 0 ";
+const char string_8a[] PROGMEM = "0 0 0 0 0 0 137 109 77 117 84 56 79 55 37 59 40 27 104 64 45 68 45 34 0 0 0 0 0 0 ";
+const char string_9a[] PROGMEM = "0 0 0 0 0 0 0 0 0 106 72 38 113 82 58 120 86 61 103 71 51 0 0 0 0 0 0 0 0 0 ";
+
 const char* const kDoggyPPM[] PROGMEM = { string_0, string_1, string_2,  string_3, string_4, string_5, string_6, string_7, string_8, string_9 };
+const char* const kDoggy2PPM[] PROGMEM = { string_0a, string_1a, string_2a,  string_3a, string_4a, string_5a, string_6a, string_7a, string_8a, string_9a };
 
 void showDoggy()
 {
@@ -464,6 +477,35 @@ void showDoggy()
 
   for (int y=0; y<10; y++) {    
     strcpy_P(ppmText, (char*)pgm_read_word(&(kDoggyPPM[y])));
+    int rc = sscanf(ppmText, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+      &rr[0], &gg[0], &bb[0],
+      &rr[1], &gg[1], &bb[1],
+      &rr[2], &gg[2], &bb[2],
+      &rr[3], &gg[3], &bb[3],
+      &rr[4], &gg[4], &bb[4],
+      &rr[5], &gg[5], &bb[5],
+      &rr[6], &gg[6], &bb[6],
+      &rr[7], &gg[7], &bb[7],
+      &rr[8], &gg[8], &bb[8],
+      &rr[9], &gg[9], &bb[9]);
+
+    for (int x=0; x<10; x++) {
+      leds.setPixelColor(getPosFromXY(x, 9-y), rr[x], gg[x], bb[x]);
+    }
+  }
+
+  leds.show();  
+}
+
+void showDoggy2()
+{
+  char ppmText[3*4*10+1];  // 4 chars/color x 3 colors x 10 pixels
+  int rr[10], gg[10], bb[10];
+  
+  clearLEDs();
+
+  for (int y=0; y<10; y++) {    
+    strcpy_P(ppmText, (char*)pgm_read_word(&(kDoggy2PPM[y])));
     int rc = sscanf(ppmText, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
       &rr[0], &gg[0], &bb[0],
       &rr[1], &gg[1], &bb[1],
@@ -502,7 +544,7 @@ void loop()
 //  }
 //  delay(2000);
 
-  char *msg = "Greetings!";
+  char *msg = "HNY  2 0 2 6!!";
   int len = strlen(msg);
   for (int i=0; i<len; i++) {
     showLetterWithRGB(font8x8_basic[msg[i] - kFontBasicOffset], rand()%256, rand()%256, rand()%256);
@@ -510,8 +552,8 @@ void loop()
   }
 
   // happy face
-  showLetter(font8x8_basic[kCodeSmiley - kFontBasicOffset], kGridColorRed);
-  delay(500);
+//  showLetter(font8x8_basic[kCodeSmiley - kFontBasicOffset], kGridColorRed);
+//  delay(500);
 
 #ifdef OPTION_TREE
   // tree
@@ -534,7 +576,8 @@ void loop()
 
 #ifdef OPTION_DOGGY
   showDoggy();
-  delay(1000);  
+  delay(2000);  
+  showDoggy2();
+  delay(2000);  
 #endif
 }
-
